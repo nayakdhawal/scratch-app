@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+src-tauri/target/
+
+# Tauri generated
+src-tauri/WixTools/
+
+# macOS
+.DS_Store
+
+# Env
+.env
+.env.local

@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #111110;
+  --surface:  #18181700;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.12);
+  --text:     #e8e5dc;
+  --text2:    #8a887f;
+  --text3:    #454540;
+  --accent:   #d4a853;
+  --accent2:  #8a6e35;
+  --result:   #6aad88;
+  --result2:  #3d6b52;
+  --error:    #c97a7a;
+  --timer:    #7a9bc9;
+  --r:        6px;
+  --mono:     'Geist Mono', monospace;
+  --sans:     'Geist', sans-serif;
+  --serif:    'Instrument Serif', serif;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+button { cursor: pointer; border: none; background: none; color: inherit; font-family: inherit; font-size: inherit; }
+input, textarea { font-family: inherit; font-size: inherit; color: inherit; background: none; border: none; outline: none; resize: none; }
+::placeholder { color: var(--text3); }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
