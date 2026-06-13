@@ -4,14 +4,19 @@ import { useTimer } from './useTimer';
 import Scratchpad from './components/Scratchpad';
 import TimerWidget from './components/TimerWidget';
 import StatusBar from './components/StatusBar';
+import iconUrl from './assets/icon.svg';
 
 const DEBOUNCE_MS = 500;
+const SWIPE_THRESHOLD = 60;  // px of horizontal deltaX to trigger
+const SWIPE_COOLDOWN  = 500; // ms before another swipe is accepted
 
 export default function App() {
   const { pads, activePad, activeId, setActiveId, updateContent, newPad, closePad, goNext, goPrev, goToIndex } = usePads();
   const { timer, startTimer, togglePause, stopTimer } = useTimer();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedRef = useRef<Date | null>(null);
+  const swipeCooldownRef = useRef(false);
+  const swipeAccumRef = useRef(0);
 
   const handleChange = useCallback((val: string) => {
     updateContent(activeId, val);
@@ -20,6 +25,31 @@ export default function App() {
       lastSavedRef.current = new Date();
     }, DEBOUNCE_MS);
   }, [activeId, updateContent]);
+
+  // Trackpad swipe navigation
+  useEffect(() => {
+    const handler = (e: WheelEvent) => {
+      // Only act on predominantly horizontal swipes
+      if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;
+      if (swipeCooldownRef.current) return;
+
+      swipeAccumRef.current += e.deltaX;
+
+      if (swipeAccumRef.current > SWIPE_THRESHOLD) {
+        goNext();
+        swipeAccumRef.current = 0;
+        swipeCooldownRef.current = true;
+        setTimeout(() => { swipeCooldownRef.current = false; }, SWIPE_COOLDOWN);
+      } else if (swipeAccumRef.current < -SWIPE_THRESHOLD) {
+        goPrev();
+        swipeAccumRef.current = 0;
+        swipeCooldownRef.current = true;
+        setTimeout(() => { swipeCooldownRef.current = false; }, SWIPE_COOLDOWN);
+      }
+    };
+    window.addEventListener('wheel', handler, { passive: true });
+    return () => window.removeEventListener('wheel', handler);
+  }, [goNext, goPrev]);
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -39,6 +69,18 @@ export default function App() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [activeId, newPad, closePad, goNext, goPrev, goToIndex]);
+
+  const handleToggleLine = useCallback((lineIndex: number) => {
+    const lines = activePad.content.split('\n');
+    const line = lines[lineIndex];
+    if (!line) return;
+    if (/\s\/x\s*$/i.test(line)) {
+      lines[lineIndex] = line.replace(/\s\/x\s*$/i, '');
+    } else {
+      lines[lineIndex] = line.trimEnd() + ' /x';
+    }
+    updateContent(activeId, lines.join('\n'));
+  }, [activePad.content, activeId, updateContent]);
 
   const lineCount = activePad.content === '' ? 0 : activePad.content.split('\n').length;
 
@@ -71,7 +113,7 @@ export default function App() {
           }}
         >
           <img
-            src="/src/assets/icon.svg"
+            src={iconUrl}
             width={14}
             height={14}
             style={{ opacity: 0.7, flexShrink: 0 }}
@@ -138,6 +180,7 @@ export default function App() {
         content={activePad.content}
         onChange={handleChange}
         onTimerStart={startTimer}
+        onToggleLine={handleToggleLine}
       />
 
       <StatusBar

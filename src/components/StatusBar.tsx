@@ -30,7 +30,7 @@ export default function StatusBar({ charCount, lineCount, lastSaved, padIndex, p
       {padCount > 1 && <span style={{ color: 'var(--text3)' }}>{padIndex + 1}/{padCount}</span>}
       <div style={{ flex: 1 }} />
       {saved && <span style={{ opacity: 0.6 }}>saved {saved}</span>}
-      <span style={{ opacity: 0.35 }}>
+      <span style={{ color: 'var(--text3)' }}>
         ⌘T new · ⌘[ ⌘] switch
       </span>
     </div>

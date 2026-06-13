@@ -1,8 +1,8 @@
 import { useRef, useEffect, useCallback } from 'react';
 import LineOverlay from './LineOverlay';
 
-const FONT_SIZE = 15;
-const LINE_HEIGHT = 26;
+const FONT_SIZE = 12;
+const LINE_HEIGHT = 20;
 const PAD_TOP = 28;
 const PAD_LEFT = 24;
 const PAD_RIGHT = 140; // space for result annotations
@@ -11,9 +11,10 @@ interface Props {
   content: string;
   onChange: (v: string) => void;
   onTimerStart: (seconds: number, label: string) => void;
+  onToggleLine: (lineIndex: number) => void;
 }
 
-export default function Scratchpad({ content, onChange, onTimerStart }: Props) {
+export default function Scratchpad({ content, onChange, onTimerStart, onToggleLine }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Focus on mount
@@ -32,7 +33,9 @@ export default function Scratchpad({ content, onChange, onTimerStart }: Props) {
       requestAnimationFrame(() => {
         el.selectionStart = el.selectionEnd = selectionStart + 2;
       });
+      return;
     }
+
   }, [onChange]);
 
   const sharedStyle: React.CSSProperties = {
@@ -46,8 +49,33 @@ export default function Scratchpad({ content, onChange, onTimerStart }: Props) {
     letterSpacing: '0.01em',
   };
 
+  const placeholderLines = [
+    'Start typing…',
+    '',
+    'Try:  1200 * 3.5',
+    '      timer pomo',
+    '      # Section heading',
+  ];
+
   return (
     <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
+      {/* Custom placeholder — shown when empty */}
+      {content === '' && (
+        <div style={{
+          ...sharedStyle,
+          zIndex: 0,
+          pointerEvents: 'none',
+          color: 'var(--text3)',
+          whiteSpace: 'pre',
+        }}>
+          {placeholderLines.map((line, i) => (
+            <div key={i} style={{ height: LINE_HEIGHT, lineHeight: `${LINE_HEIGHT}px` }}>
+              {line}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Textarea — where the user types */}
       <textarea
         ref={textareaRef}
@@ -57,7 +85,6 @@ export default function Scratchpad({ content, onChange, onTimerStart }: Props) {
         spellCheck={false}
         autoCorrect="off"
         autoCapitalize="off"
-        placeholder={"Start typing…\n\nTry: 1200 * 3.5\n     timer pomo\n     # Section heading"}
         style={{
           ...sharedStyle,
           width: '100%',
@@ -78,9 +105,10 @@ export default function Scratchpad({ content, onChange, onTimerStart }: Props) {
         <LineOverlay
           content={content}
           lineHeight={LINE_HEIGHT}
-          paddingTop={0}
+          paddingTop={PAD_TOP}
           fontSize={FONT_SIZE}
           onTimerStart={onTimerStart}
+          onToggleLine={onToggleLine}
         />
       </div>
     </div>
